@@ -25,7 +25,7 @@ class ArrayField(models.Field):
         super(ArrayField, self).__init__()
         
         # For the fieldtype argument, as well as a class object,
-        # we accept a string of full class path.
+        # we accept a string of a full class path.
         # e.g. "django.db.models.field.IntegerField"
         # This is in order to play nicely with South
         if isinstance(self.fieldclass, basestring):
@@ -41,7 +41,13 @@ class ArrayField(models.Field):
                 
         self.fieldtype = self.fieldclass(*args, **kwargs)
         self.validators = self.fieldtype.validators
+        self.null = self.fieldtype.null
         self.default = kwargs.pop('default', None)
+    
+    def contribute_to_class(self, *args, **kwargs):
+        super(ArrayField, self).contribute_to_class(*args, **kwargs)
+        self.fieldtype.model = self.model
+        self.fieldtype.set_attributes_from_name(self.name)
     
     def db_type(self, connection):
         if 'post' not in connection.settings_dict['ENGINE']:
@@ -51,17 +57,26 @@ class ArrayField(models.Field):
     def to_python(self, value):
         # psycopg2 already supports array types, so we don't actually need to serialize
         # or deserialize
+        if value is None:
+            return None
         if not isinstance(value, (list, tuple)):
-            raise ValidationError("This value must be an array.")
+            try:
+                iter(value)
+            except TypeError:
+                raise ValidationError("An ArrayField value must be None or an iterable.")
         return [self.fieldtype.to_python(x) for x in value]
         
     def get_db_prep_value(self, value, connection, prepared=False):
         if 'post' not in connection.settings_dict['ENGINE']:
             raise FieldError("ArrayField is currently implemented only for PostgreSQL")
+        if value is None:
+            return None
         return [self.fieldtype.get_db_prep_value(value=v, connection=connection, prepared=prepared)
             for v in value]
             
     def get_prep_value(self, value):
+        if value is None:
+            return None
         return [self.fieldtype.get_prep_value(v) for v in value]
         
     def pre_save(self, model_instance, add):
@@ -83,7 +98,8 @@ class ArrayField(models.Field):
         return (our_field_class, args, kwargs)
         
     def run_validators(self, value):
-        for v in value:
-            super(ArrayField, self).run_validators(v)
+        if value is not None:
+            for v in value:
+                super(ArrayField, self).run_validators(v)
         
     
