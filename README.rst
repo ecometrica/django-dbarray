@@ -6,7 +6,7 @@ Usage
 
 Note that this field currently works only on Postgres/psycopg2. Requires Django >= 1.2.
 
-Four field types are defined in the ``dbarray`` module:
+Four field types are defined in the ``dbarray`` module::
 
     from django.db import models
     
@@ -24,7 +24,7 @@ Four field types are defined in the ``dbarray`` module:
 Custom fields
 ==========
 
-To define an array type based on a field other than Integer, Float, Text, or Char:
+To define an array type based on a field other than Integer, Float, Text, or Char::
 
     import dbarray
     
