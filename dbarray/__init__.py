@@ -24,7 +24,7 @@ class ArrayFieldBase(object):
         # or deserialize
         if value is None:
             return None
-        if not isinstance(value, (list, tuple)):
+        if not isinstance(value, (list, tuple, set, deque,)):
             try:
                 iter(value)
             except TypeError:
@@ -62,7 +62,17 @@ def array_field_factory(name, fieldtype, module=ArrayFieldBase.__module__):
                 
 IntegerArrayField = array_field_factory('IntegerArrayField', models.IntegerField)
 FloatArrayField = array_field_factory('FloatArrayField', models.FloatField)
-CharArrayField = array_field_factory('CharArrayField', models.CharField)
 TextArrayField = array_field_factory('TextArrayField', models.TextField)
+
+class CharArrayField(ArrayFieldBase, models.CharField):
+    __metaclass__ = ArrayFieldMetaclass
+    def get_prep_value(self, value):
+        if isinstance(value, basestring):
+            return [value]
+        if value is None:
+            return None
+        if not isinstance(value, (list, tuple, set, deque,)):
+            raise ValidationError("An ArrayField value must be None or an iterable.")
+        return map(smart_unicode, value)
 
     
