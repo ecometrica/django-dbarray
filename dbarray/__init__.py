@@ -1,5 +1,7 @@
 from django.core.exceptions import FieldError, ValidationError
 from django.db import models
+from django.utils.encoding import smart_unicode
+from collections import deque
 
 def require_postgres(connection):
     engine = connection.settings_dict['ENGINE']
