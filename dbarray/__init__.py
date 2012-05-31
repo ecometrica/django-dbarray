@@ -75,4 +75,7 @@ class CharArrayField(ArrayFieldBase, models.CharField):
             raise ValidationError("An ArrayField value must be None or an iterable.")
         return map(smart_unicode, value)
 
+class DateArrayField(ArrayFieldBase, models.DateField):
+    __metaclass__ = ArrayFieldMetaclass
+
     
