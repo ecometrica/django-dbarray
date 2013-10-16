@@ -37,6 +37,7 @@ class ArrayFieldBase(object):
     """
     
     _south_introspects = True
+    cast_lookups = False
     
     def db_type(self, connection):
         try:
@@ -67,6 +68,8 @@ class ArrayFieldBase(object):
     def get_db_prep_lookup(self, lookup_type, value, connection, prepared=False):
         if not prepared:
             value = self.get_prep_lookup(lookup_type, value)
+        if not self.cast_lookups:
+            return [value]
         db_type = self.db_type(connection=connection)
         return Extra(value, '%%s::%s' % db_type)
 
@@ -94,10 +97,14 @@ def array_field_factory(name, fieldtype, module=ArrayFieldBase.__module__):
                 
 IntegerArrayField = array_field_factory('IntegerArrayField', models.IntegerField)
 TextArrayField = array_field_factory('TextArrayField', models.TextField)
-FloatArrayField = array_field_factory('FloatArrayField', models.FloatField)
+
+class FloatArrayField(ArrayFieldBase, models.FloatField):
+    __metaclass__ = ArrayFieldMetaclass
+    cast_lookups = True
 
 class CharArrayField(ArrayFieldBase, models.CharField):
     __metaclass__ = ArrayFieldMetaclass
+    cast_lookups = True
     def get_prep_value(self, value):
         if isinstance(value, basestring):
             return [value]
