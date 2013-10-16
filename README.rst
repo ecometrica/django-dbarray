@@ -1,6 +1,9 @@
-A Django model field that stores lists of values. Implemented using the PostgreSQL array type.
+==============
+Django dbarray
+===============
 
-============
+A Django model field that stores lists of values, implemented using the PostgreSQL ``ARRAY`` type.
+
 Requirements
 ============
 
@@ -9,32 +12,32 @@ Requirements
 * Django >= 1.2
  
 The ARRAY db type is PostgreSQL specific, so these model fields currently
-work only on PostgreSQL/psycopg2.  It has been tested on all major versions
+work only on PostgreSQL with psycopg2.  It has been tested on all major versions
 of Django (currently 1.2 through 1.6 inclusive).
 
-==========
-Usage
-==========
+Fields
+================
 
-Four field types are defined in the ``dbarray`` module::
+The field types defined in the ``dbarray`` module are listed in the table below,
+along with each field's parent class (from ``django.db.models``), and the data
+type of the postgresql column it will create.
 
-    from django.db import models
-    
-    import dbarray
+Each field takes the same arguments as its parent class.
 
-    class Foo(models.Model):
-        
-        numlist = dbarray.IntegerArrayField()
-        floatlist = dbarray.FloatArrayField(null=True)
-        textlist = dbarray.TextArrayField(
-            help_text="Fields take the same arguments as their corresponding Django fields.")
-        charlist = dbarray.CharArrayField(max_length=5)
+=================== =================== ================
+Field Type          Parent Class        Postgresql Type
+------------------- ------------------- ----------------
+IntegerArrayField   IntegerField        integer[]
+FloatArrayField     FloatField          double precision[]
+TextArrayField      TextField           text[]
+CharArrayField      CharField           character varying[]
+DateArrayField      DateField           date[]
+=================== =================== ================
 
+Custom Fields
 ==============
-Custom fields
-==============
 
-To define an array type based on a field other than Integer, Float, Text, or Char::
+To define a new array field for a base field type ``FooField``::
 
     import dbarray
     
@@ -46,7 +49,7 @@ to override the db_type method to make it put the ``[]`` in the right spot in th
 type used in generated SQL.
 
 Another issue that may arise when performing lookups with array fields 
-is that PostgreSQL may get the query parameter with a different data type
+is that PostgreSQL may get the query parameter as a data type
 that isn't compatible with the type of the db column (for example text[]
 instead of varchar[]).  Then you will get an error like the following::
 
@@ -63,10 +66,11 @@ Look in the source code for more examples of how to handle issues with new
 ArrayField types.
 
 
-===============
 Version History
 ===============
 
-Version 0.1 - October 16, 2013
+Version 0.1
+--------------------------------
+:Released: October 16, 2013
 
 Added tests and fixes for lookups and DateArrayField.
