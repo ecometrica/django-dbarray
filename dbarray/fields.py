@@ -18,16 +18,18 @@ def require_postgres(connection):
     if 'psycopg2' not in engine and 'postgis' not in engine:
         raise FieldError("Array fields are currently implemented only for PostgreSQL/psycopg2")
 
-class Extra(object):
+class Cast(object):
     """
     A utility class which allows us to slip type-casts into the SQL query
     """
-    def __init__(self, value, extra):
+    def __init__(self, value, get_db_type):
         self.value = value
-        self.extra = extra
+        self.get_db_type = get_db_type
 
     def as_sql(self, qn, connection):
-        return self.extra, [self.value] 
+        db_type = self.get_db_type(connection=connection)
+        cast = '%%s::%s' % db_type
+        return cast, [self.value] 
 
 class ArrayFieldBase(object):
     """Django field type for an array of values. Supported only on PostgreSQL.
@@ -70,8 +72,7 @@ class ArrayFieldBase(object):
             value = self.get_prep_lookup(lookup_type, value)
         if not self.cast_lookups:
             return [value]
-        db_type = self.db_type(connection=connection)
-        return Extra(value, '%%s::%s' % db_type)
+        return Cast(value, self.db_type)
 
     def run_validators(self, value):
         if value is None:
