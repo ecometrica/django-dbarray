@@ -6,7 +6,7 @@ def read(fname):
     
 setup(
     name = "django-dbarray",
-    version = "0.0.1",
+    version = "0.1",
     packages = find_packages(),
     description = "Django ORM field for Postgres array types.",
     author = "Ecometrica",
