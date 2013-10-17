@@ -74,3 +74,9 @@ Version 0.1
 :Released: October 16, 2013
 
 Added tests and fixes for lookups and DateArrayField.
+
+Version 0.0.1
+--------------------------------
+:Released: January 10, 2011
+
+Initial release
