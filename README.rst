@@ -69,6 +69,13 @@ ArrayField types.
 Version History
 ===============
 
+Version 0.2
+--------------------------------
+:Released: October 17, 2013
+
+The fields raise a FieldError exception if used on a database other than
+PostgreSQL.  (This was the original behavior)
+
 Version 0.1
 --------------------------------
 :Released: October 16, 2013
