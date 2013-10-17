@@ -1,19 +1,19 @@
-==============
+===============
 Django dbarray
 ===============
 
-A Django model field that stores lists of values, implemented using the PostgreSQL ``ARRAY`` type.
+Django model fields that store lists of values, implemented using the PostgreSQL ``ARRAY`` type.
 
 Requirements
 ============
 
-* Postgresql
+* PostgreSQL
 * psycopg2
 * Django >= 1.2
  
 The ARRAY db type is PostgreSQL specific, so these model fields currently
-work only on PostgreSQL with psycopg2.  It has been tested on all major versions
-of Django (currently 1.2 through 1.6 inclusive).
+work only on PostgreSQL with psycopg2.  It has been tested on versions
+1.2 through 1.6 of Django, inclusive.
 
 Fields
 ================
