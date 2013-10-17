@@ -13,7 +13,7 @@ setup(
     author_email = "info@ecometrica.ca",
     maintainer = "Michael Mulley",
     maintainer_email = "michael@michaelmulley.com",
-    url = "http://github.com/ecometrica/django-vinaigrette/",
+    url = "http://github.com/ecometrica/django-dbarray/",
     keywords = ["django", "model", "field", 
         "postgres", "postgresql", "database", "array", "list"],
     classifiers = [
