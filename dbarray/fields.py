@@ -42,11 +42,8 @@ class ArrayFieldBase(object):
     cast_lookups = False
     
     def db_type(self, connection):
-        try:
-            require_postgres(connection)
-            return super(ArrayFieldBase, self).db_type(connection=connection) + '[]'
-        except:
-            return super(ArrayFieldBase, self).db_type(connection=connection)
+        require_postgres(connection)
+        return super(ArrayFieldBase, self).db_type(connection=connection) + '[]'
         
     def to_python(self, value):
         # psycopg2 already supports array types, so we don't actually need to serialize
