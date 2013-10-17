@@ -12,8 +12,10 @@ Requirements
 * Django >= 1.2
  
 The ARRAY db type is PostgreSQL specific, so these model fields currently
-work only on PostgreSQL with psycopg2.  It has been tested on versions
-1.2 through 1.6 of Django, inclusive.
+work only on PostgreSQL with psycopg2.  A ``FieldError`` will be raised if the
+field is used with another database.
+
+This package has been tested with Django versions 1.2 through 1.6, inclusive.
 
 Fields
 ================
