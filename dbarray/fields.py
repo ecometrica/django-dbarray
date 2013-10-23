@@ -118,7 +118,7 @@ class CharArrayField(ArrayFieldBase, models.CharField):
             return None
         if not isinstance(value, (list, tuple, set, deque,)):
             raise ValidationError("An ArrayField value must be None or an iterable.")
-        return map(smart_text, value)
+        return list(map(smart_text, value))
 
 class DateField(models.DateField):
     def get_prep_value(self, value):
