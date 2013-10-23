@@ -1,7 +1,15 @@
+import sys
+
 from django.core.exceptions import FieldError, ValidationError
 from django.db import models
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 from collections import deque
+
+PY2 = sys.version_info[0] == 2
+if not PY2:
+    string_types = (str,)
+else:
+    string_types = basestring
 
 __all__ = (
         'ArrayFieldBase',
@@ -104,13 +112,13 @@ class CharArrayField(ArrayFieldBase, models.CharField):
     __metaclass__ = ArrayFieldMetaclass
     cast_lookups = True
     def get_prep_value(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, string_types):
             return [value]
         if value is None:
             return None
         if not isinstance(value, (list, tuple, set, deque,)):
             raise ValidationError("An ArrayField value must be None or an iterable.")
-        return map(smart_unicode, value)
+        return map(smart_text, value)
 
 class DateField(models.DateField):
     def get_prep_value(self, value):
