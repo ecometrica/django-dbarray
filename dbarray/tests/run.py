@@ -20,8 +20,11 @@ settings.configure(
         # 'django.contrib.admin',
     ),
 )
-
-from discover_runner import DiscoverRunner
+try:
+    from django.test.runner import DiscoverRunner
+except ImportError:
+    # Fallback for django < 1.6
+    from discover_runner import DiscoverRunner
 
 test_runner = DiscoverRunner(verbosity=1)
 failures = test_runner.run_tests(['dbarray'])
