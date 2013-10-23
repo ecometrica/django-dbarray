@@ -12,14 +12,9 @@ settings.configure(
             'HOST': 'localhost'
         }
     },
-    INSTALLED_APPS=(
-        'dbarray.tests',
-        # 'django.contrib.auth',
-        # 'django.contrib.contenttypes',
-        # 'django.contrib.sessions',
-        # 'django.contrib.admin',
-    ),
+    INSTALLED_APPS=('dbarray.tests',),
 )
+
 try:
     from django.test.runner import DiscoverRunner
 except ImportError:
