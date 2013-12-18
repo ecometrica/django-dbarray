@@ -1,6 +1,6 @@
 from django.db import models
 
-from .fields import *
+from ..fields import *
 
 class Integers(models.Model):
     arr = IntegerArrayField(null=True)

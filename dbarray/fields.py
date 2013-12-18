@@ -1,7 +1,29 @@
+import sys
+
 from django.core.exceptions import FieldError, ValidationError
 from django.db import models
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 from collections import deque
+
+PY2 = sys.version_info[0] == 2
+if not PY2:
+    string_types = (str,)
+else:
+    string_types = basestring
+
+def add_metaclass(metaclass):
+    """Class decorator for creating a class with a metaclass.
+
+    from https://github.com/kelp404/six/blob/1.4.1/six.py
+    """
+    def wrapper(cls):
+        orig_vars = cls.__dict__.copy()
+        orig_vars.pop('__dict__', None)
+        orig_vars.pop('__weakref__', None)
+        for slots_var in orig_vars.get('__slots__', ()):
+            orig_vars.pop(slots_var)
+        return metaclass(cls.__name__, cls.__bases__, orig_vars)
+    return wrapper
 
 __all__ = (
         'ArrayFieldBase',
@@ -89,36 +111,53 @@ def array_field_factory(name, fieldtype, module=ArrayFieldBase.__module__):
         
 # If you want to make an array version of a field not covered below, this is
 # the easiest way:
-# 
+#
+# On python 2:
+#
 # class FooArrayField(dbarray.ArrayFieldBase, FooField):
 #     __metaclass__ = dbarray.ArrayFieldMetaclass
-                
+#
+# On python 3:
+#
+# class FooArrayField(dbarray.ArrayFieldBase, FooField, metaclass=dbarray.ArrayFieldMetaclass):
+#     pass
+#
+# On both (with six):
+#
+# @six.add_metaclass(dbarray.ArrayFieldMetaclass)
+# class FooArrayField(dbarray.ArrayFieldBase, FooField):
+#     pass
+
 IntegerArrayField = array_field_factory('IntegerArrayField', models.IntegerField)
 TextArrayField = array_field_factory('TextArrayField', models.TextField)
 
+
+@add_metaclass(ArrayFieldMetaclass)
 class FloatArrayField(ArrayFieldBase, models.FloatField):
-    __metaclass__ = ArrayFieldMetaclass
     cast_lookups = True
 
+
+@add_metaclass(ArrayFieldMetaclass)
 class CharArrayField(ArrayFieldBase, models.CharField):
-    __metaclass__ = ArrayFieldMetaclass
     cast_lookups = True
     def get_prep_value(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, string_types):
             return [value]
         if value is None:
             return None
         if not isinstance(value, (list, tuple, set, deque,)):
             raise ValidationError("An ArrayField value must be None or an iterable.")
-        return map(smart_unicode, value)
+        return list(map(smart_text, value))
+
 
 class DateField(models.DateField):
     def get_prep_value(self, value):
         # make sure the right to_python() gets called here
         return super(DateField, self).to_python(value)
 
+
+@add_metaclass(ArrayFieldMetaclass)
 class DateArrayField(ArrayFieldBase, DateField):
-    __metaclass__ = ArrayFieldMetaclass
     def get_db_prep_value(self, value, connection, prepared=False):
         # Casts dates into the format expected by the backend
         # Don't use connection.ops.value_to_db_date, it won't work

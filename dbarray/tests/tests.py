@@ -18,7 +18,7 @@ class ArrayTestMixin(object):
 
     def test_create_save_get(self):
         a = self.model.objects.create(arr=self.arr)
-        newarr = self.arr[:len(self.arr)/2]
+        newarr = self.arr[:int(len(self.arr)/2)]
         a.arr = newarr
         a.save()
         b = self.model.objects.get(id=a.id)
@@ -34,7 +34,7 @@ class ArrayTestMixin(object):
     def test_create_lookup_update_get(self):
         o = self.model.objects.create(arr=self.arr)
         qset = self.model.objects.filter(arr=self.arr)
-        newarr = self.arr[:len(self.arr)/2]
+        newarr = self.arr[:int(len(self.arr)/2)]
         qset.update(arr=newarr)
         o = self.model.objects.get(id=o.id)
         self.assertEqual(o.arr, newarr)

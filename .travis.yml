@@ -1,0 +1,20 @@
+language: python
+python:
+  - "2.6"
+  - "2.7"
+  - "3.3"
+env:
+  - DJANGO=django==1.4.8
+  - DJANGO=django==1.5.4
+  - DJANGO=https://github.com/django/django/archive/stable/1.6.x.zip
+script: python dbarray/tests/run.py
+notifications:
+  email: false
+install:
+  - psql -c 'CREATE DATABASE dbarray' -U postgres;
+  - pip install $DJANGO psycopg2 django-discover-runner
+  - pip install -e .
+matrix:
+  exclude:
+    - python: "3.3"
+      env: DJANGO=django==1.4.8
