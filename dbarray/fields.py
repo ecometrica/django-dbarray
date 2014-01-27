@@ -2,7 +2,10 @@ import sys
 
 from django.core.exceptions import FieldError, ValidationError
 from django.db import models
-from django.utils.encoding import smart_text
+try:
+    from django.utils.encoding import smart_text
+except ImportError:
+    from django.utils.encoding import smart_unicode as smart_text
 from collections import deque
 
 PY2 = sys.version_info[0] == 2
