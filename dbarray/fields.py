@@ -1,3 +1,4 @@
+import re
 import sys
 
 from django.core.exceptions import FieldError, ValidationError
@@ -54,22 +55,22 @@ class Cast(object):
     def as_sql(self, qn, connection):
         db_type = self.get_db_type(connection=connection)
         cast = '%%s::%s' % db_type
-        return cast, [self.value] 
+        return cast, [self.value]
 
 class ArrayFieldBase(object):
     """Django field type for an array of values. Supported only on PostgreSQL.
-    
+
     This class is not meant to be instantiated directly; instead, field classes
     should inherit from this class and from an appropriate Django model class.
     """
-    
+
     _south_introspects = True
     cast_lookups = False
-    
+
     def db_type(self, connection):
         require_postgres(connection)
         return super(ArrayFieldBase, self).db_type(connection=connection) + '[]'
-        
+
     def to_python(self, value):
         # psycopg2 already supports array types, so we don't actually need to serialize
         # or deserialize
@@ -82,13 +83,13 @@ class ArrayFieldBase(object):
                 raise ValidationError("An ArrayField value must be None or an iterable.")
         s = super(ArrayFieldBase, self)
         return [s.to_python(x) for x in value]
-            
+
     def get_prep_value(self, value):
         if value is None:
             return None
         s = super(ArrayFieldBase, self)
         return [s.get_prep_value(v) for v in value]
-        
+
     def get_db_prep_lookup(self, lookup_type, value, connection, prepared=False):
         if not prepared:
             value = self.get_prep_lookup(lookup_type, value)
@@ -102,7 +103,7 @@ class ArrayFieldBase(object):
         else:
             for v in value:
                 super(ArrayFieldBase, self).run_validators(v)
-                
+
 class ArrayFieldMetaclass(models.SubfieldBase):
     pass
 
@@ -111,7 +112,7 @@ def array_field_factory(name, fieldtype, module=ArrayFieldBase.__module__):
         {'__module__': module,
         'description': "An array, where each element is of the same type "\
         "as %s." % fieldtype.__name__})
-        
+
 # If you want to make an array version of a field not covered below, this is
 # the easiest way:
 #
@@ -151,6 +152,23 @@ class CharArrayField(ArrayFieldBase, models.CharField):
         if not isinstance(value, (list, tuple, set, deque,)):
             raise ValidationError("An ArrayField value must be None or an iterable.")
         return list(map(smart_text, value))
+
+    def to_python(self, value):
+        if isinstance(value, string_types):
+            # A String is iterable, but since this is a CharArray, we don't
+            # want to break the string into a list of characters if what we're
+            # given looks like a string representation of a python list.
+            #
+            # This code prevents the django admin from turning this:
+            #
+            #  u"['foo']"
+            #
+            # into this:
+            #
+            #  ['[', "'", 'f', 'o', 'o', "'", ']']
+            value = re.sub(r"\[|\]|'|\"", '', value)
+            value = [v.strip() for v in value.split(",")]
+        return value
 
 
 class DateField(models.DateField):
